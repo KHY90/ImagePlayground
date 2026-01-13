@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import auth
+from src.api.routes import auth, images, jobs
 from src.core.config import get_settings
 from src.core.database import init_db
 
@@ -49,6 +49,8 @@ async def health_check():
 
 # Include routers
 app.include_router(auth.router, prefix="/api")
+app.include_router(jobs.router, prefix="/api")
+app.include_router(images.router, prefix="/api")
 
 
 # Root endpoint

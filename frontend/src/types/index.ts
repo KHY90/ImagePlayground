@@ -48,19 +48,44 @@ export interface JobParameters {
 
 export interface Job {
   id: string;
-  userId: string;
+  user_id: string;
   type: JobType;
   status: JobStatus;
-  parameters: JobParameters;
-  resultImageId?: string;
-  errorMessage?: string;
-  createdAt: string;
-  completedAt?: string;
+  prompt: string;
+  negative_prompt?: string | null;
+  aspect_ratio: string;
+  seed?: number | null;
+  steps: number;
+  strength?: number | null;
+  source_image_id?: string | null;
+  result_image_id?: string | null;
+  error_message?: string | null;
+  created_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+
+  // Camel case aliases for frontend convenience
+  userId?: string;
+  negativePrompt?: string | null;
+  aspectRatio?: string;
+  sourceImageId?: string | null;
+  resultImageId?: string | null;
+  errorMessage?: string | null;
+  createdAt?: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
 }
 
 export interface CreateJobRequest {
   type: JobType;
-  parameters: JobParameters;
+  prompt: string;
+  negative_prompt?: string;
+  aspect_ratio?: string;
+  seed?: number | null;
+  steps?: number;
+  strength?: number;
+  source_image_id?: string;
+  mask_data?: string;
 }
 
 // Image Types

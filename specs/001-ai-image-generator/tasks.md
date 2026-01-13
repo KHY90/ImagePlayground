@@ -78,46 +78,46 @@
 
 ### 3.1 Job System Backend
 
-- [ ] **T036** [US1] Job 모델 구현 (status, type, parameters 등) (`backend/src/models/job.py`)
-- [ ] **T037** [US1] GeneratedImage 모델 구현 (`backend/src/models/image.py`)
-- [ ] **T038** [US1] Job 스키마 정의 (`backend/src/schemas/job.py`)
-- [ ] **T039** [US1] Image 스키마 정의 (`backend/src/schemas/image.py`)
+- [x] **T036** [US1] Job 모델 구현 (status, type, parameters 등) (`backend/src/models/job.py`)
+- [x] **T037** [US1] GeneratedImage 모델 구현 (`backend/src/models/image.py`)
+- [x] **T038** [US1] Job 스키마 정의 (`backend/src/schemas/job.py`)
+- [x] **T039** [US1] Image 스키마 정의 (`backend/src/schemas/image.py`)
 - [ ] **T040** [US1] Job/GeneratedImage 마이그레이션 생성 및 실행
 
 ### 3.2 HuggingFace Integration
 
-- [ ] **T041** [US1] HuggingFace InferenceClient 래퍼 구현 (`backend/src/services/hf_client.py`)
-- [ ] **T042** [US1] Text-to-Image 생성 메서드 구현 (`backend/src/services/hf_client.py`)
-- [ ] **T043** [US1] 이미지 저장 서비스 구현 (`backend/src/services/image_service.py`)
-- [ ] **T044** [US1] 재시도 로직 및 에러 핸들링 구현 (`backend/src/services/hf_client.py`)
+- [x] **T041** [US1] HuggingFace InferenceClient 래퍼 구현 (`backend/src/services/hf_client.py`)
+- [x] **T042** [US1] Text-to-Image 생성 메서드 구현 (`backend/src/services/hf_client.py`)
+- [x] **T043** [US1] 이미지 저장 서비스 구현 (`backend/src/services/image_service.py`)
+- [x] **T044** [US1] 재시도 로직 및 에러 핸들링 구현 (`backend/src/services/hf_client.py`)
 
 ### 3.3 Job Processing
 
-- [ ] **T045** [US1] JobService 구현 - 작업 생성 (`backend/src/services/job_service.py`)
-- [ ] **T046** [US1] JobService 구현 - 작업 상태 조회 (`backend/src/services/job_service.py`)
-- [ ] **T047** [US1] BackgroundTasks를 이용한 비동기 이미지 생성 처리 (`backend/src/services/job_service.py`)
-- [ ] **T048** [US1] 일일 사용량 체크 및 제한 로직 구현 (`backend/src/services/job_service.py`)
+- [x] **T045** [US1] JobService 구현 - 작업 생성 (`backend/src/services/job_service.py`)
+- [x] **T046** [US1] JobService 구현 - 작업 상태 조회 (`backend/src/services/job_service.py`)
+- [x] **T047** [US1] BackgroundTasks를 이용한 비동기 이미지 생성 처리 (`backend/src/services/job_service.py`)
+- [x] **T048** [US1] 일일 사용량 체크 및 제한 로직 구현 (`backend/src/services/job_service.py`)
 
 ### 3.4 Jobs API
 
-- [ ] **T049** [US1] Jobs 라우터 구현 - POST /jobs (작업 생성) (`backend/src/api/routes/jobs.py`)
-- [ ] **T050** [US1] Jobs 라우터 구현 - GET /jobs (목록 조회) (`backend/src/api/routes/jobs.py`)
-- [ ] **T051** [US1] Jobs 라우터 구현 - GET /jobs/{jobId} (상세 조회) (`backend/src/api/routes/jobs.py`)
+- [x] **T049** [US1] Jobs 라우터 구현 - POST /jobs (작업 생성) (`backend/src/api/routes/jobs.py`)
+- [x] **T050** [US1] Jobs 라우터 구현 - GET /jobs (목록 조회) (`backend/src/api/routes/jobs.py`)
+- [x] **T051** [US1] Jobs 라우터 구현 - GET /jobs/{jobId} (상세 조회) (`backend/src/api/routes/jobs.py`)
 - [ ] **T052** [US1] Jobs API 단위 테스트 작성 (`backend/tests/unit/test_jobs.py`)
 - [ ] **T053** [US1] HuggingFace 클라이언트 통합 테스트 (`backend/tests/integration/test_hf_client.py`)
 
 ### 3.5 Text-to-Image Frontend
 
-- [ ] **T054** [P] [US1] Generation 스토어 구현 (파라미터 상태 관리) (`frontend/src/stores/generationStore.ts`)
-- [ ] **T055** [P] [US1] useJobs 훅 구현 (TanStack Query) (`frontend/src/hooks/useJobs.ts`)
-- [ ] **T056** [P] [US1] PromptInput 컴포넌트 (메인/네거티브 프롬프트) (`frontend/src/components/generation/PromptInput.tsx`)
-- [ ] **T057** [P] [US1] ParameterPanel 컴포넌트 (비율, 시드, 스텝 등) (`frontend/src/components/generation/ParameterPanel.tsx`)
-- [ ] **T058** [P] [US1] GenerateButton 컴포넌트 (`frontend/src/components/generation/GenerateButton.tsx`)
-- [ ] **T059** [P] [US1] JobStatusIndicator 컴포넌트 (폴링 상태 표시) (`frontend/src/components/generation/JobStatusIndicator.tsx`)
-- [ ] **T060** [P] [US1] ImagePreview 컴포넌트 (결과 이미지 표시) (`frontend/src/components/generation/ImagePreview.tsx`)
-- [ ] **T061** [P] [US1] DownloadButton 컴포넌트 (`frontend/src/components/generation/DownloadButton.tsx`)
-- [ ] **T062** [P] [US1] UsageIndicator 컴포넌트 (일일 사용량 표시) (`frontend/src/components/common/UsageIndicator.tsx`)
-- [ ] **T063** [P] [US1] HomePage 구현 (Text-to-Image 모드) (`frontend/src/pages/HomePage.tsx`)
+- [x] **T054** [P] [US1] Generation 스토어 구현 (파라미터 상태 관리) (`frontend/src/stores/generationStore.ts`)
+- [x] **T055** [P] [US1] useJobs 훅 구현 (TanStack Query) (`frontend/src/hooks/useJobs.ts`)
+- [x] **T056** [P] [US1] PromptInput 컴포넌트 (메인/네거티브 프롬프트) (`frontend/src/components/generation/PromptInput.tsx`)
+- [x] **T057** [P] [US1] ParameterPanel 컴포넌트 (비율, 시드, 스텝 등) (`frontend/src/components/generation/ParameterPanel.tsx`)
+- [x] **T058** [P] [US1] GenerateButton 컴포넌트 (`frontend/src/components/generation/GenerateButton.tsx`)
+- [x] **T059** [P] [US1] JobStatusIndicator 컴포넌트 (폴링 상태 표시) (`frontend/src/components/generation/JobStatusIndicator.tsx`)
+- [x] **T060** [P] [US1] ImagePreview 컴포넌트 (결과 이미지 표시) (`frontend/src/components/generation/ImagePreview.tsx`)
+- [x] **T061** [P] [US1] DownloadButton 컴포넌트 (`frontend/src/components/generation/DownloadButton.tsx`)
+- [x] **T062** [P] [US1] UsageIndicator 컴포넌트 (일일 사용량 표시) (`frontend/src/components/common/UsageIndicator.tsx`)
+- [x] **T063** [P] [US1] HomePage 구현 (Text-to-Image 모드) (`frontend/src/pages/HomePage.tsx`)
 - [ ] **T064** [US1] Text-to-Image E2E 흐름 테스트
 
 ---
