@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: imageplayground-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=ImagePlayground
+      - DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_URL=sqlite+aiosqlite:///./data/app.db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-secret-key-change-in-production}
+      - JWT_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - REFRESH_TOKEN_EXPIRE_DAYS=7
+      - HUGGINGFACE_API_TOKEN=${HUGGINGFACE_API_TOKEN:-}
+      - DAILY_GENERATION_LIMIT=10
+      - CORS_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173","http://frontend:5173"]
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/data:/app/data
+      - ./backend/uploads:/app/uploads
+      - ./backend/generated:/app/generated
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: imageplayground-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: imageplayground-network
