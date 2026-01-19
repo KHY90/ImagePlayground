@@ -7,28 +7,28 @@ interface JobStatusIndicatorProps {
 
 const STATUS_CONFIG = {
   pending: {
-    label: 'Waiting in queue...',
+    label: '대기 중...',
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-50',
-    icon: '⏳',
+    icon: '...',
   },
   processing: {
-    label: 'Generating image...',
+    label: '이미지 생성 중...',
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
-    icon: '🎨',
+    icon: '...',
   },
   completed: {
-    label: 'Completed!',
+    label: '완료!',
     color: 'text-green-600',
     bgColor: 'bg-green-50',
-    icon: '✓',
+    icon: 'O',
   },
   failed: {
-    label: 'Generation failed',
+    label: '생성 실패',
     color: 'text-red-600',
     bgColor: 'bg-red-50',
-    icon: '✕',
+    icon: 'X',
   },
 };
 

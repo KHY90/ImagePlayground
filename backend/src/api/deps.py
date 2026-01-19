@@ -2,73 +2,41 @@
 
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
-from src.core.security import verify_token
-from src.models.user import User
-from src.services.auth_service import AuthService
-
-security = HTTPBearer()
 
 
-async def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-) -> User:
-    """Get current authenticated user from JWT token."""
-    token = credentials.credentials
-    payload = verify_token(token, token_type="access")
 
-    if not payload:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    user_id = payload.get("sub")
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    auth_service = AuthService(db)
-    user = await auth_service.get_user_by_id(user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is disabled",
-        )
-
-    return user
+# Default local user for development (no authentication required)
+DEFAULT_USER_ID = "local-user-001"
+DEFAULT_USER_EMAIL = "local@localhost"
+DEFAULT_USER_NAME = "LocalUser"
 
 
-async def get_current_admin_user(
-    current_user: Annotated[User, Depends(get_current_user)],
-) -> User:
-    """Get current user and verify admin status."""
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required",
-        )
-    return current_user
+class LocalUser:
+    """Simple user object for local development without authentication."""
+
+    def __init__(self):
+        self.id = DEFAULT_USER_ID
+        self.email = DEFAULT_USER_EMAIL
+        self.username = DEFAULT_USER_NAME
+        self.is_active = True
+        self.is_admin = True  # Admin access for local development
+
+
+async def get_current_user() -> LocalUser:
+    """Return a local user without authentication."""
+    return LocalUser()
+
+
+async def get_current_admin_user() -> LocalUser:
+    """Return a local admin user without authentication."""
+    return LocalUser()
 
 
 # Type aliases for cleaner dependency injection
-CurrentUser = Annotated[User, Depends(get_current_user)]
-AdminUser = Annotated[User, Depends(get_current_admin_user)]
+CurrentUser = Annotated[LocalUser, Depends(get_current_user)]
+AdminUser = Annotated[LocalUser, Depends(get_current_admin_user)]
 DbSession = Annotated[AsyncSession, Depends(get_db)]

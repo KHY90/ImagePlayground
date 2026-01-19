@@ -2,7 +2,9 @@
 
 import logging
 from datetime import date, datetime, timezone
+from pathlib import Path
 
+from PIL import Image
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +13,7 @@ from src.models.daily_usage import DailyUsage
 from src.models.image import GeneratedImage
 from src.models.job import Job, JobStatus, JobType
 from src.schemas.job import CreateJobRequest, JobResponse
-from src.services.hf_client import get_hf_client
+from src.services.hf_client import get_hf_client, ASPECT_RATIOS
 from src.services.image_service import get_image_service
 
 settings = get_settings()
@@ -69,12 +71,6 @@ class JobService:
 
     async def create_job(self, user_id: str, request: CreateJobRequest) -> Job:
         """Create a new generation job."""
-        # Check usage limit
-        if not await self.check_usage_limit(user_id):
-            raise ValueError(
-                f"Daily generation limit ({settings.daily_generation_limit}) exceeded"
-            )
-
         job = Job(
             user_id=user_id,
             type=request.type.value,
@@ -209,6 +205,85 @@ class JobService:
 
         except Exception as e:
             logger.error(f"Job {job.id} failed: {e}")
+            await self.update_job_status(job.id, JobStatus.FAILED, str(e))
+            await self.db.commit()
+            return None
+
+    async def process_image_to_image(self, job: Job) -> GeneratedImage | None:
+        """Process an image-to-image job."""
+        try:
+            # Update status to processing
+            await self.update_job_status(job.id, JobStatus.PROCESSING)
+            await self.db.commit()
+
+            # Load source image
+            if not job.source_image_id:
+                raise ValueError("source_image_id is required for img2img")
+
+            source_path = Path(settings.upload_dir) / job.user_id / f"{job.source_image_id}.png"
+            if not source_path.exists():
+                raise ValueError(f"Source image not found: {job.source_image_id}")
+
+            source_image = Image.open(source_path)
+
+            # Resize source image to target aspect ratio if specified
+            target_width, target_height = ASPECT_RATIOS.get(job.aspect_ratio, (1024, 1024))
+            source_image = await self.image_service.resize_image(
+                source_image,
+                target_width,
+                target_height,
+                mode="crop",
+            )
+
+            # Transform image
+            result_image = await self.hf_client.image_to_image(
+                image=source_image,
+                prompt=job.prompt,
+                negative_prompt=job.negative_prompt,
+                strength=job.strength or 0.8,
+                seed=job.seed,
+                num_inference_steps=job.steps,
+            )
+
+            # Save result image
+            image_data = await self.image_service.save_generated_image(
+                image=result_image,
+                user_id=job.user_id,
+                job_id=job.id,
+                prompt=job.prompt,
+                negative_prompt=job.negative_prompt,
+                parameters={
+                    "type": job.type,
+                    "aspect_ratio": job.aspect_ratio,
+                    "seed": job.seed,
+                    "steps": job.steps,
+                    "strength": job.strength,
+                    "source_image_id": job.source_image_id,
+                },
+            )
+
+            # Create database record
+            generated_image = GeneratedImage(
+                user_id=job.user_id,
+                job_id=job.id,
+                **image_data,
+            )
+            self.db.add(generated_image)
+
+            # Update job status
+            await self.update_job_status(job.id, JobStatus.COMPLETED)
+
+            # Increment usage
+            await self.increment_daily_usage(job.user_id)
+
+            await self.db.commit()
+            await self.db.refresh(generated_image)
+
+            logger.info(f"Img2img job {job.id} completed successfully")
+            return generated_image
+
+        except Exception as e:
+            logger.error(f"Img2img job {job.id} failed: {e}")
             await self.update_job_status(job.id, JobStatus.FAILED, str(e))
             await self.db.commit()
             return None

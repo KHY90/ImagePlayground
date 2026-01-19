@@ -1,36 +1,3 @@
-// User Types
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  isAdmin: boolean;
-  createdAt: string;
-  dailyUsage: number;
-  dailyLimit: number;
-}
-
-// Auth Types
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  username: string;
-}
-
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-}
-
-export interface AuthResponse extends AuthTokens {
-  user: User;
-}
-
 // Job Types
 export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed';
 export type JobType = 'text2img' | 'img2img' | 'inpaint';

@@ -1,18 +1,137 @@
 """Images API routes."""
 
+import logging
+from io import BytesIO
 from math import ceil
 from pathlib import Path
+from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
+from PIL import Image
 
 from src.api.deps import CurrentUser, DbSession
-from src.schemas.image import ImageDownloadResponse, ImageListResponse, ImageResponse
+from src.core.config import get_settings
+from src.schemas.image import (
+    ImageDownloadResponse,
+    ImageListResponse,
+    ImageResponse,
+    ImageUploadResponse,
+)
 from src.services.image_service import get_image_service
 from sqlalchemy import func, select
 from src.models.image import GeneratedImage
 
 router = APIRouter(prefix="/images", tags=["Images"])
+logger = logging.getLogger(__name__)
+settings = get_settings()
+
+# Allowed image types
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp"}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+
+@router.post(
+    "/upload",
+    response_model=ImageUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload an image for img2img or inpainting",
+)
+async def upload_image(
+    file: UploadFile = File(...),
+    current_user: CurrentUser = None,
+) -> ImageUploadResponse:
+    """
+    Upload an image to use as source for img2img or inpainting.
+
+    Returns the image ID to use as source_image_id in job creation.
+    """
+    # Validate content type
+    if file.content_type not in ALLOWED_MIME_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_MIME_TYPES)}",
+        )
+
+    # Read file content
+    content = await file.read()
+
+    # Validate file size
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024 * 1024)}MB",
+        )
+
+    # Validate image
+    try:
+        image = Image.open(BytesIO(content))
+        image.verify()  # Verify it's a valid image
+        # Re-open for actual use (verify() can only be called once)
+        image = Image.open(BytesIO(content))
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or corrupted image file",
+        )
+
+    # Generate unique ID
+    image_id = str(uuid4())
+
+    # Create user upload directory
+    upload_dir = Path(settings.upload_dir) / current_user.id
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save the image as PNG
+    file_path = upload_dir / f"{image_id}.png"
+
+    # Convert to RGB if needed (handle RGBA, P mode, etc.)
+    if image.mode in ("RGBA", "P", "LA"):
+        # Create white background for transparency
+        background = Image.new("RGB", image.size, (255, 255, 255))
+        if image.mode == "P":
+            image = image.convert("RGBA")
+        background.paste(image, mask=image.split()[-1] if "A" in image.mode else None)
+        image = background
+    elif image.mode != "RGB":
+        image = image.convert("RGB")
+
+    image.save(file_path, format="PNG", optimize=True)
+    file_size = file_path.stat().st_size
+
+    logger.info(f"User {current_user.id} uploaded image {image_id} ({image.width}x{image.height})")
+
+    return ImageUploadResponse(
+        id=image_id,
+        width=image.width,
+        height=image.height,
+        file_size=file_size,
+        mime_type="image/png",
+    )
+
+
+@router.get(
+    "/upload/{image_id}",
+    summary="Get uploaded image",
+)
+async def get_uploaded_image(
+    image_id: str,
+    current_user: CurrentUser,
+):
+    """Get an uploaded image by ID."""
+    upload_dir = Path(settings.upload_dir) / current_user.id
+    file_path = upload_dir / f"{image_id}.png"
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Uploaded image not found",
+        )
+
+    return FileResponse(
+        path=file_path,
+        media_type="image/png",
+    )
 
 
 @router.get(

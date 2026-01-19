@@ -20,10 +20,10 @@ export default function ParameterPanel() {
 
   return (
     <div className="space-y-4">
-      {/* Aspect Ratio */}
+      {/* 화면 비율 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Aspect Ratio
+          화면 비율
         </label>
         <div className="grid grid-cols-4 gap-2">
           {ASPECT_RATIOS.map((ratio) => (
@@ -42,10 +42,10 @@ export default function ParameterPanel() {
         </div>
       </div>
 
-      {/* Steps */}
+      {/* 스텝 수 */}
       <div>
         <label htmlFor="steps" className="block text-sm font-medium text-gray-700 mb-1">
-          Steps: {steps}
+          스텝 수: {steps}
         </label>
         <input
           type="range"
@@ -57,16 +57,16 @@ export default function ParameterPanel() {
           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
         />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>10 (Fast)</span>
-          <span>50 (Quality)</span>
+          <span>10 (빠름)</span>
+          <span>50 (고품질)</span>
         </div>
       </div>
 
-      {/* Seed */}
+      {/* 시드 */}
       <div>
         <label htmlFor="seed" className="block text-sm font-medium text-gray-700 mb-1">
-          Seed
-          <span className="text-gray-400 font-normal ml-1">(optional)</span>
+          시드
+          <span className="text-gray-400 font-normal ml-1">(선택사항)</span>
         </label>
         <div className="flex gap-2">
           <input
@@ -77,24 +77,24 @@ export default function ParameterPanel() {
             min={0}
             max={2147483647}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder="Random"
+            placeholder="랜덤"
           />
           <button
             type="button"
             onClick={generateRandomSeed}
             className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            title="Generate random seed"
+            title="랜덤 시드 생성"
           >
-            🎲
+            주사위
           </button>
           {seed !== null && (
             <button
               type="button"
               onClick={() => setSeed(null)}
               className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              title="Clear seed"
+              title="시드 초기화"
             >
-              ✕
+              X
             </button>
           )}
         </div>

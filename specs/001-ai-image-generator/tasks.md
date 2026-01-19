@@ -126,19 +126,19 @@
 
 ### 4.1 Image-to-Image Backend
 
-- [ ] **T065** [US2] Image-to-Image 생성 메서드 구현 (`backend/src/services/hf_client.py`)
-- [ ] **T066** [US2] 이미지 업로드 처리 및 검증 로직 구현 (`backend/src/services/image_service.py`)
-- [ ] **T067** [US2] 이미지 리사이즈/크롭 유틸리티 구현 (`backend/src/services/image_service.py`)
-- [ ] **T068** [US2] Jobs 라우터 - img2img 타입 지원 추가 (`backend/src/api/routes/jobs.py`)
+- [x] **T065** [US2] Image-to-Image 생성 메서드 구현 (`backend/src/services/hf_client.py`)
+- [x] **T066** [US2] 이미지 업로드 처리 및 검증 로직 구현 (`backend/src/api/routes/images.py`)
+- [x] **T067** [US2] 이미지 리사이즈/크롭 유틸리티 구현 (`backend/src/services/image_service.py`)
+- [x] **T068** [US2] Jobs 라우터 - img2img 타입 지원 추가 (`backend/src/api/routes/jobs.py`)
 - [ ] **T069** [US2] Image-to-Image API 테스트 작성 (`backend/tests/unit/test_img2img.py`)
 
 ### 4.2 Image-to-Image Frontend
 
-- [ ] **T070** [P] [US2] ImageUploader 컴포넌트 (`frontend/src/components/generation/ImageUploader.tsx`)
-- [ ] **T071** [P] [US2] StrengthSlider 컴포넌트 (변형 강도 조절) (`frontend/src/components/generation/StrengthSlider.tsx`)
-- [ ] **T072** [P] [US2] ResizeOptions 컴포넌트 (크롭/패딩 선택) (`frontend/src/components/generation/ResizeOptions.tsx`)
-- [ ] **T073** [P] [US2] GenerationModeSelector 컴포넌트 (Text2Img/Img2Img 전환) (`frontend/src/components/generation/GenerationModeSelector.tsx`)
-- [ ] **T074** [US2] HomePage - Image-to-Image 모드 통합 (`frontend/src/pages/HomePage.tsx`)
+- [x] **T070** [P] [US2] ImageUploader 컴포넌트 (`frontend/src/components/generation/ImageUploader.tsx`)
+- [x] **T071** [P] [US2] StrengthSlider 컴포넌트 (변형 강도 조절) (`frontend/src/components/generation/StrengthSlider.tsx`)
+- [x] **T072** [P] [US2] ResizeOptions 컴포넌트 (크롭/패딩 선택) (`frontend/src/components/generation/ResizeOptions.tsx`)
+- [x] **T073** [P] [US2] GenerationModeSelector 컴포넌트 (Text2Img/Img2Img 전환) (`frontend/src/components/generation/GenerationModeSelector.tsx`)
+- [x] **T074** [US2] HomePage - Image-to-Image 모드 통합 (`frontend/src/pages/HomePage.tsx`)
 - [ ] **T075** [US2] Image-to-Image E2E 흐름 테스트
 
 ---

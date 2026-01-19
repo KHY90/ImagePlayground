@@ -25,8 +25,11 @@ async def process_job_background(job_id: str, user_id: str, db_url: str):
         job_service = JobService(session)
         job = await job_service.get_job(job_id, user_id)
 
-        if job and job.type == "text2img":
-            await job_service.process_text_to_image(job)
+        if job:
+            if job.type == "text2img":
+                await job_service.process_text_to_image(job)
+            elif job.type == "img2img":
+                await job_service.process_image_to_image(job)
 
     await engine.dispose()
 
@@ -50,13 +53,6 @@ async def create_job(
     Poll the job status endpoint to check for completion.
     """
     job_service = JobService(db)
-
-    # Check usage limit
-    if not await job_service.check_usage_limit(current_user.id):
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Daily generation limit ({job_service.db}) exceeded. Try again tomorrow.",
-        )
 
     try:
         job = await job_service.create_job(current_user.id, request)

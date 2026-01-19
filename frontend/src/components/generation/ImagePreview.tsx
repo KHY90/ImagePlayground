@@ -14,11 +14,7 @@ export default function ImagePreview({ imageId, prompt }: ImagePreviewProps) {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(imageUrl, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
+      const response = await fetch(imageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -29,14 +25,14 @@ export default function ImagePreview({ imageId, prompt }: ImagePreviewProps) {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
-      console.error('Download failed:', err);
+      console.error('다운로드 실패:', err);
     }
   };
 
   if (error) {
     return (
       <div className="flex items-center justify-center bg-gray-100 rounded-lg p-8">
-        <p className="text-gray-500">Failed to load image</p>
+        <p className="text-gray-500">이미지를 불러올 수 없습니다</p>
       </div>
     );
   }
@@ -50,8 +46,8 @@ export default function ImagePreview({ imageId, prompt }: ImagePreviewProps) {
           </div>
         )}
         <img
-          src={`${thumbnailUrl}?token=${localStorage.getItem('accessToken')}`}
-          alt={prompt || 'Generated image'}
+          src={thumbnailUrl}
+          alt={prompt || '생성된 이미지'}
           className={`w-full h-auto transition-opacity ${isLoading ? 'opacity-0' : 'opacity-100'}`}
           onLoad={() => setIsLoading(false)}
           onError={() => {
@@ -72,7 +68,7 @@ export default function ImagePreview({ imageId, prompt }: ImagePreviewProps) {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
-        Download
+        다운로드
       </button>
     </div>
   );

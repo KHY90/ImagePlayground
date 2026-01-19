@@ -42,3 +42,13 @@ class ImageDownloadResponse(BaseModel):
     filename: str
     mime_type: str
     file_size: int
+
+
+class ImageUploadResponse(BaseModel):
+    """Response schema for uploaded image."""
+
+    id: str
+    width: int
+    height: int
+    file_size: int
+    mime_type: str

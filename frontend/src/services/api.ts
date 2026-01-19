@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -9,70 +9,36 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('accessToken');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+// Image API
+export interface UploadedImage {
+  id: string;
+  width: number;
+  height: number;
+  file_size: number;
+  mime_type: string;
+}
+
+export const imageApi = {
+  upload: async (file: File): Promise<UploadedImage> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post('/images/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   },
-  (error) => Promise.reject(error)
-);
 
-// Response interceptor to handle token refresh
-api.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+  getUploadedUrl: (imageId: string) =>
+    `${api.defaults.baseURL}/images/upload/${imageId}`,
 
-    // If 401 and not already retrying
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+  getGeneratedUrl: (imageId: string) =>
+    `${api.defaults.baseURL}/images/${imageId}/download`,
 
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${API_URL}/api/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
-
-          const { access_token, refresh_token } = response.data;
-          localStorage.setItem('accessToken', access_token);
-          localStorage.setItem('refreshToken', refresh_token);
-
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${access_token}`;
-          }
-
-          return api(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, clear tokens
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
-        }
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-// Auth API
-export const authApi = {
-  register: (data: { email: string; username: string; password: string }) =>
-    api.post('/auth/register', data),
-
-  login: (data: { email: string; password: string }) =>
-    api.post('/auth/login', data),
-
-  refresh: (refreshToken: string) =>
-    api.post('/auth/refresh', { refresh_token: refreshToken }),
-
-  getMe: () => api.get('/auth/me'),
+  getThumbnailUrl: (imageId: string) =>
+    `${api.defaults.baseURL}/images/${imageId}/thumbnail`,
 };
 
 export default api;
