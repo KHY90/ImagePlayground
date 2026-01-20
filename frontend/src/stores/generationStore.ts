@@ -6,6 +6,10 @@ interface GenerationState {
   mode: JobType;
   setMode: (mode: JobType) => void;
 
+  // Model selection
+  model: string;
+  setModel: (model: string) => void;
+
   // Prompts
   prompt: string;
   negativePrompt: string;
@@ -40,8 +44,11 @@ interface GenerationState {
   resetPrompts: () => void;
 }
 
+const DEFAULT_MODEL = 'runwayml/stable-diffusion-v1-5';
+
 const initialState = {
   mode: 'text2img' as JobType,
+  model: DEFAULT_MODEL,
   prompt: '',
   negativePrompt: '',
   aspectRatio: '1:1',
@@ -58,6 +65,8 @@ export const useGenerationStore = create<GenerationState>((set) => ({
   ...initialState,
 
   setMode: (mode) => set({ mode }),
+
+  setModel: (model) => set({ model }),
 
   setPrompt: (prompt) => set({ prompt }),
   setNegativePrompt: (negativePrompt) => set({ negativePrompt }),

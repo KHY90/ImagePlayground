@@ -12,7 +12,7 @@ from src.core.config import get_settings
 from src.core.database import Base
 
 # Import all models to register them with Base.metadata
-from src.models import DailyUsage, User  # noqa: F401
+from src.models import DailyUsage, User, Job, GeneratedImage, Preset  # noqa: F401
 
 config = context.config
 settings = get_settings()

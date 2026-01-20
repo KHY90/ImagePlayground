@@ -10,6 +10,7 @@ interface CreateJobParams {
   seed?: number | null;
   steps?: number;
   strength?: number;
+  model?: string;
   sourceImageId?: string;
   maskData?: string;
 }
@@ -34,6 +35,7 @@ export function useCreateJob() {
         seed: params.seed || null,
         steps: params.steps || 30,
         strength: params.strength,
+        model: params.model,
         source_image_id: params.sourceImageId,
         mask_data: params.maskData,
       });

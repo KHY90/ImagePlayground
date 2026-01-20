@@ -3,6 +3,7 @@ import { useGeneration, useJob } from "../hooks/useJobs";
 import { useGenerationStore } from "../stores/generationStore";
 import { UploadedImage } from "../services/api";
 import GenerationModeSelector from "../components/generation/GenerationModeSelector";
+import ModelSelector from "../components/generation/ModelSelector";
 import PromptInput from "../components/generation/PromptInput";
 import ParameterPanel from "../components/generation/ParameterPanel";
 import GenerateButton from "../components/generation/GenerateButton";
@@ -18,6 +19,7 @@ export default function HomePage() {
   const { generate, isGenerating, error } = useGeneration();
   const {
     mode,
+    model,
     prompt,
     negativePrompt,
     aspectRatio,
@@ -101,6 +103,7 @@ export default function HomePage() {
         aspectRatio,
         seed,
         steps,
+        model,
         ...((mode === "img2img" || mode === "inpaint") && {
           strength,
           sourceImageId: uploadedImageId || undefined,
@@ -146,6 +149,11 @@ export default function HomePage() {
           {/* 모드 선택 */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <GenerationModeSelector />
+          </div>
+
+          {/* 모델 선택 */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <ModelSelector />
           </div>
 
           {/* 메인 입력 섹션 */}

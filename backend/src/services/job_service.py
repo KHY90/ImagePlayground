@@ -13,7 +13,7 @@ from src.models.daily_usage import DailyUsage
 from src.models.image import GeneratedImage
 from src.models.job import Job, JobStatus, JobType
 from src.schemas.job import CreateJobRequest, JobResponse
-from src.services.hf_client import get_hf_client, ASPECT_RATIOS
+from src.services.local_inference import get_local_client, get_dimensions_for_model
 from src.services.image_service import get_image_service
 
 settings = get_settings()
@@ -25,7 +25,7 @@ class JobService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.hf_client = get_hf_client()
+        self.inference_client = get_local_client()
         self.image_service = get_image_service()
 
     async def get_daily_usage(self, user_id: str) -> int:
@@ -81,6 +81,7 @@ class JobService:
             seed=request.seed,
             steps=request.steps,
             strength=request.strength,
+            model=request.model or settings.default_model,
             source_image_id=request.source_image_id,
             mask_data=request.mask_data,
         )
@@ -160,12 +161,13 @@ class JobService:
             await self.db.commit()
 
             # Generate image
-            image = await self.hf_client.text_to_image(
+            image = await self.inference_client.text_to_image(
                 prompt=job.prompt,
                 negative_prompt=job.negative_prompt,
                 aspect_ratio=job.aspect_ratio,
                 seed=job.seed,
                 num_inference_steps=job.steps,
+                model=job.model,
             )
 
             # Save image
@@ -227,7 +229,7 @@ class JobService:
             source_image = Image.open(source_path)
 
             # Resize source image to target aspect ratio if specified
-            target_width, target_height = ASPECT_RATIOS.get(job.aspect_ratio, (1024, 1024))
+            target_width, target_height = get_dimensions_for_model(job.aspect_ratio, job.model)
             source_image = await self.image_service.resize_image(
                 source_image,
                 target_width,
@@ -236,13 +238,14 @@ class JobService:
             )
 
             # Transform image
-            result_image = await self.hf_client.image_to_image(
+            result_image = await self.inference_client.image_to_image(
                 image=source_image,
                 prompt=job.prompt,
                 negative_prompt=job.negative_prompt,
                 strength=job.strength or 0.8,
                 seed=job.seed,
                 num_inference_steps=job.steps,
+                model=job.model,
             )
 
             # Save result image
@@ -312,7 +315,7 @@ class JobService:
             mask = await self.image_service.decode_mask_from_base64(job.mask_data)
 
             # Resize source image and mask to target aspect ratio
-            target_width, target_height = ASPECT_RATIOS.get(job.aspect_ratio, (1024, 1024))
+            target_width, target_height = get_dimensions_for_model(job.aspect_ratio, job.model)
             source_image = await self.image_service.resize_image(
                 source_image,
                 target_width,
@@ -329,13 +332,14 @@ class JobService:
             await self.image_service.save_mask_image(mask, job.user_id, job.id)
 
             # Perform inpainting
-            result_image = await self.hf_client.inpaint(
+            result_image = await self.inference_client.inpaint(
                 image=source_image,
                 mask=mask,
                 prompt=job.prompt,
                 negative_prompt=job.negative_prompt,
                 seed=job.seed,
                 num_inference_steps=job.steps,
+                model=job.model,
             )
 
             # Save result image
@@ -401,6 +405,7 @@ class JobService:
             seed=job.seed,
             steps=job.steps,
             strength=job.strength,
+            model=job.model,
             source_image_id=job.source_image_id,
             error_message=job.error_message,
             created_at=job.created_at,

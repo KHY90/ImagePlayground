@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     # HuggingFace
     huggingface_api_token: str = ""
 
+    # Inference settings
+    use_local_inference: bool = True
+    default_model: str = "runwayml/stable-diffusion-v1-5"
+
     # Storage
     upload_dir: str = "./uploads"
     generated_dir: str = "./generated"

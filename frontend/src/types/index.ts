@@ -24,6 +24,7 @@ export interface Job {
   seed?: number | null;
   steps: number;
   strength?: number | null;
+  model?: string | null;
   source_image_id?: string | null;
   result_image_id?: string | null;
   error_message?: string | null;
@@ -51,6 +52,7 @@ export interface CreateJobRequest {
   seed?: number | null;
   steps?: number;
   strength?: number;
+  model?: string;
   source_image_id?: string;
   mask_data?: string;
 }
@@ -157,4 +159,28 @@ export interface CanvasState {
 export interface Point {
   x: number;
   y: number;
+}
+
+// Model Types
+export interface ModelInfo {
+  id: string;
+  name: string;
+  description: string;
+  capabilities: ("text2img" | "img2img" | "inpaint")[];
+  vram_requirement: string;
+  base_resolution: number;
+}
+
+export interface ModelListResponse {
+  items: ModelInfo[];
+  default_model: string;
+}
+
+export interface DeviceInfo {
+  device: string;
+  cuda_available: boolean;
+  gpu_name?: string;
+  gpu_memory_total?: number;
+  gpu_memory_allocated?: number;
+  gpu_memory_cached?: number;
 }

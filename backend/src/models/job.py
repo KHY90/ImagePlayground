@@ -67,6 +67,9 @@ class Job(Base):
     steps: Mapped[int] = mapped_column(default=30)
     strength: Mapped[float | None] = mapped_column(nullable=True)  # for img2img
 
+    # Model selection
+    model: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
     # Source image for img2img/inpaint
     source_image_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     mask_data: Mapped[str | None] = mapped_column(Text, nullable=True)  # base64 for inpaint

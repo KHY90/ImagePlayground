@@ -46,6 +46,7 @@ class CreateJobRequest(BaseModel):
     strength: float | None = Field(None, ge=0.0, le=1.0)
     source_image_id: str | None = None
     mask_data: str | None = None  # base64 encoded mask for inpaint
+    model: str | None = None  # model ID for generation
 
 
 class JobResponse(BaseModel):
@@ -61,6 +62,7 @@ class JobResponse(BaseModel):
     seed: int | None
     steps: int
     strength: float | None
+    model: str | None
     source_image_id: str | None
     error_message: str | None
     created_at: datetime
