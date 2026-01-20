@@ -41,7 +41,6 @@ export function useCreateJob() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },
   });
 }

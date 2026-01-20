@@ -139,7 +139,7 @@
 - [x] **T072** [P] [US2] ResizeOptions 컴포넌트 (크롭/패딩 선택) (`frontend/src/components/generation/ResizeOptions.tsx`)
 - [x] **T073** [P] [US2] GenerationModeSelector 컴포넌트 (Text2Img/Img2Img 전환) (`frontend/src/components/generation/GenerationModeSelector.tsx`)
 - [x] **T074** [US2] HomePage - Image-to-Image 모드 통합 (`frontend/src/pages/HomePage.tsx`)
-- [ ] **T075** [US2] Image-to-Image E2E 흐름 테스트
+- [x] **T075** [US2] Image-to-Image E2E 흐름 테스트
 
 ---
 
@@ -147,25 +147,25 @@
 
 ### 5.1 Inpainting Backend
 
-- [ ] **T076** [US3] Inpainting 생성 메서드 구현 (`backend/src/services/hf_client.py`)
-- [ ] **T077** [US3] 마스크 이미지 처리 로직 구현 (`backend/src/services/image_service.py`)
-- [ ] **T078** [US3] Preset 모델 구현 (`backend/src/models/preset.py`)
-- [ ] **T079** [US3] Preset 스키마 및 라우터 구현 (`backend/src/api/routes/presets.py`)
-- [ ] **T080** [US3] Jobs 라우터 - inpaint 타입 지원 추가 (`backend/src/api/routes/jobs.py`)
-- [ ] **T081** [US3] 기본 프리셋 데이터 시딩 (배경 교체, 오브젝트 제거 등)
+- [x] **T076** [US3] Inpainting 생성 메서드 구현 (`backend/src/services/hf_client.py`)
+- [x] **T077** [US3] 마스크 이미지 처리 로직 구현 (`backend/src/services/image_service.py`)
+- [x] **T078** [US3] Preset 모델 구현 (`backend/src/models/preset.py`)
+- [x] **T079** [US3] Preset 스키마 및 라우터 구현 (`backend/src/api/routes/presets.py`)
+- [x] **T080** [US3] Jobs 라우터 - inpaint 타입 지원 추가 (`backend/src/api/routes/jobs.py`)
+- [x] **T081** [US3] 기본 프리셋 데이터 시딩 (배경 교체, 오브젝트 제거 등)
 - [ ] **T082** [US3] Inpainting API 테스트 작성 (`backend/tests/unit/test_inpaint.py`)
 
 ### 5.2 Canvas & Masking Frontend
 
-- [ ] **T083** [P] [US3] Canvas 스토어 구현 (Zustand) (`frontend/src/stores/canvasStore.ts`)
-- [ ] **T084** [P] [US3] useCanvas 훅 구현 (`frontend/src/hooks/useCanvas.ts`)
-- [ ] **T085** [P] [US3] MaskCanvas 컴포넌트 (Konva.js Stage 설정) (`frontend/src/components/canvas/MaskCanvas.tsx`)
-- [ ] **T086** [P] [US3] BrushTool 컴포넌트 (브러시 크기, 색상) (`frontend/src/components/canvas/BrushTool.tsx`)
-- [ ] **T087** [P] [US3] EraserTool 컴포넌트 (`frontend/src/components/canvas/EraserTool.tsx`)
-- [ ] **T088** [P] [US3] CanvasToolbar 컴포넌트 (도구 선택 UI) (`frontend/src/components/canvas/CanvasToolbar.tsx`)
-- [ ] **T089** [P] [US3] MaskExporter 유틸리티 (Canvas -> Base64 PNG) (`frontend/src/components/canvas/MaskExporter.ts`)
-- [ ] **T090** [P] [US3] PresetSelector 컴포넌트 (`frontend/src/components/generation/PresetSelector.tsx`)
-- [ ] **T091** [US3] HomePage - Inpainting 모드 통합 (`frontend/src/pages/HomePage.tsx`)
+- [x] **T083** [P] [US3] Canvas 스토어 구현 (Zustand) (`frontend/src/stores/canvasStore.ts`)
+- [x] **T084** [P] [US3] useCanvas 훅 구현 (`frontend/src/hooks/useCanvas.ts`)
+- [x] **T085** [P] [US3] MaskCanvas 컴포넌트 (Konva.js Stage 설정) (`frontend/src/components/canvas/MaskCanvas.tsx`)
+- [x] **T086** [P] [US3] BrushTool 컴포넌트 (브러시 크기, 색상) (`frontend/src/components/canvas/BrushTool.tsx`)
+- [x] **T087** [P] [US3] EraserTool 컴포넌트 (`frontend/src/components/canvas/EraserTool.tsx`)
+- [x] **T088** [P] [US3] CanvasToolbar 컴포넌트 (도구 선택 UI) (`frontend/src/components/canvas/CanvasToolbar.tsx`)
+- [x] **T089** [P] [US3] MaskExporter 유틸리티 (Canvas -> Base64 PNG) (`frontend/src/components/canvas/MaskExporter.ts`)
+- [x] **T090** [P] [US3] PresetSelector 컴포넌트 (`frontend/src/components/generation/PresetSelector.tsx`)
+- [x] **T091** [US3] HomePage - Inpainting 모드 통합 (`frontend/src/pages/HomePage.tsx`)
 - [ ] **T092** [US3] Inpainting E2E 흐름 테스트
 
 ---

@@ -21,7 +21,7 @@ async def process_job_background(job_id: str, user_id: str, db_url: str):
     from src.services.job_service import JobService
 
     engine = create_async_engine(db_url)
-    async with AsyncSession(engine) as session:
+    async with AsyncSession(engine, expire_on_commit=False) as session:
         job_service = JobService(session)
         job = await job_service.get_job(job_id, user_id)
 
