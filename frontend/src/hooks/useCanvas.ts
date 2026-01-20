@@ -1,6 +1,6 @@
-import { useCallback, useRef, useEffect } from 'react';
-import { useCanvasStore } from '../stores/canvasStore';
-import type { Point } from '../types';
+import { useCallback, useRef, useEffect } from "react";
+import { useCanvasStore } from "../stores/canvasStore";
+import type { Point } from "../types";
 
 interface UseCanvasOptions {
   width: number;
@@ -30,7 +30,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
   // Get drawing context
   const getContext = useCallback(() => {
     if (!maskCanvasRef) return null;
-    return maskCanvasRef.getContext('2d');
+    return maskCanvasRef.getContext("2d");
   }, [maskCanvasRef]);
 
   // Convert mouse/touch event to canvas coordinates
@@ -45,7 +45,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
       let clientX: number;
       let clientY: number;
 
-      if ('touches' in event) {
+      if ("touches" in event) {
         if (event.touches.length === 0) return null;
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;
@@ -59,7 +59,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
         y: (clientY - rect.top) * scaleY,
       };
     },
-    [maskCanvasRef]
+    [maskCanvasRef],
   );
 
   // Draw a line between two points
@@ -71,17 +71,18 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
       ctx.beginPath();
       ctx.moveTo(from.x, from.y);
       ctx.lineTo(to.x, to.y);
-      ctx.strokeStyle = tool === 'eraser' ? 'rgba(0,0,0,1)' : brushColor;
+      ctx.strokeStyle = tool === "eraser" ? "rgba(0,0,0,1)" : brushColor;
       ctx.lineWidth = brushSize;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.globalAlpha = tool === 'eraser' ? 1 : opacity;
-      ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.globalAlpha = tool === "eraser" ? 1 : opacity;
+      ctx.globalCompositeOperation =
+        tool === "eraser" ? "destination-out" : "source-over";
       ctx.stroke();
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
     },
-    [getContext, tool, brushSize, brushColor, opacity]
+    [getContext, tool, brushSize, brushColor, opacity],
   );
 
   // Draw a single point (for click without drag)
@@ -92,14 +93,15 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
 
       ctx.beginPath();
       ctx.arc(point.x, point.y, brushSize / 2, 0, Math.PI * 2);
-      ctx.fillStyle = tool === 'eraser' ? 'rgba(0,0,0,1)' : brushColor;
-      ctx.globalAlpha = tool === 'eraser' ? 1 : opacity;
-      ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+      ctx.fillStyle = tool === "eraser" ? "rgba(0,0,0,1)" : brushColor;
+      ctx.globalAlpha = tool === "eraser" ? 1 : opacity;
+      ctx.globalCompositeOperation =
+        tool === "eraser" ? "destination-out" : "source-over";
       ctx.fill();
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
     },
-    [getContext, tool, brushSize, brushColor, opacity]
+    [getContext, tool, brushSize, brushColor, opacity],
   );
 
   // Start drawing
@@ -116,7 +118,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
       // Draw initial point
       drawPoint(point);
     },
-    [getCanvasPoint, setIsDrawing, drawPoint]
+    [getCanvasPoint, setIsDrawing, drawPoint],
   );
 
   // Continue drawing
@@ -131,7 +133,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
       drawLine(lastPointRef.current, point);
       lastPointRef.current = point;
     },
-    [getCanvasPoint, drawLine]
+    [getCanvasPoint, drawLine],
   );
 
   // Stop drawing
@@ -144,12 +146,17 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
       // Save to history
       const ctx = getContext();
       if (ctx && maskCanvasRef) {
-        const imageData = ctx.getImageData(0, 0, maskCanvasRef.width, maskCanvasRef.height);
+        const imageData = ctx.getImageData(
+          0,
+          0,
+          maskCanvasRef.width,
+          maskCanvasRef.height,
+        );
         saveToHistory(imageData);
 
         // Notify parent of mask change
         if (onMaskChange) {
-          const maskData = maskCanvasRef.toDataURL('image/png');
+          const maskData = maskCanvasRef.toDataURL("image/png");
           onMaskChange(maskData);
         }
       }
@@ -163,7 +170,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
     if (imageData && ctx) {
       ctx.putImageData(imageData, 0, 0);
       if (onMaskChange && maskCanvasRef) {
-        onMaskChange(maskCanvasRef.toDataURL('image/png'));
+        onMaskChange(maskCanvasRef.toDataURL("image/png"));
       }
     }
   }, [storeUndo, getContext, onMaskChange, maskCanvasRef]);
@@ -175,7 +182,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
     if (imageData && ctx) {
       ctx.putImageData(imageData, 0, 0);
       if (onMaskChange && maskCanvasRef) {
-        onMaskChange(maskCanvasRef.toDataURL('image/png'));
+        onMaskChange(maskCanvasRef.toDataURL("image/png"));
       }
     }
   }, [storeRedo, getContext, onMaskChange, maskCanvasRef]);
@@ -183,7 +190,7 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
   // Export mask as base64
   const exportMask = useCallback((): string | null => {
     if (!maskCanvasRef) return null;
-    return maskCanvasRef.toDataURL('image/png');
+    return maskCanvasRef.toDataURL("image/png");
   }, [maskCanvasRef]);
 
   // Clear canvas
@@ -191,10 +198,15 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
     const ctx = getContext();
     if (ctx && maskCanvasRef) {
       ctx.clearRect(0, 0, maskCanvasRef.width, maskCanvasRef.height);
-      const imageData = ctx.getImageData(0, 0, maskCanvasRef.width, maskCanvasRef.height);
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        maskCanvasRef.width,
+        maskCanvasRef.height,
+      );
       saveToHistory(imageData);
       if (onMaskChange) {
-        onMaskChange(maskCanvasRef.toDataURL('image/png'));
+        onMaskChange(maskCanvasRef.toDataURL("image/png"));
       }
     }
   }, [getContext, maskCanvasRef, saveToHistory, onMaskChange]);
@@ -203,7 +215,12 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
   useEffect(() => {
     const ctx = getContext();
     if (ctx && maskCanvasRef) {
-      const imageData = ctx.getImageData(0, 0, maskCanvasRef.width, maskCanvasRef.height);
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        maskCanvasRef.width,
+        maskCanvasRef.height,
+      );
       saveToHistory(imageData);
     }
   }, [maskCanvasRef, width, height]);
@@ -212,22 +229,28 @@ export function useCanvas({ width, height, onMaskChange }: UseCanvasOptions) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Ctrl/Cmd + Z for undo
-      if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key === "z" &&
+        !event.shiftKey
+      ) {
         event.preventDefault();
         undo();
       }
       // Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y for redo
       if (
-        ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'z') ||
-        ((event.ctrlKey || event.metaKey) && event.key === 'y')
+        ((event.ctrlKey || event.metaKey) &&
+          event.shiftKey &&
+          event.key === "z") ||
+        ((event.ctrlKey || event.metaKey) && event.key === "y")
       ) {
         event.preventDefault();
         redo();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [undo, redo]);
 
   return {

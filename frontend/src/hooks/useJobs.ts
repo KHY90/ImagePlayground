@@ -1,9 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../services/api';
-import type { Job, JobStatus, CreateJobRequest, PaginatedResponse } from '../types';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import api from "../services/api";
+import type { Job, JobStatus, PaginatedResponse } from "../types";
 
 interface CreateJobParams {
-  type: 'text2img' | 'img2img' | 'inpaint';
+  type: "text2img" | "img2img" | "inpaint";
   prompt: string;
   negativePrompt?: string;
   aspectRatio?: string;
@@ -26,11 +26,11 @@ export function useCreateJob() {
 
   return useMutation({
     mutationFn: async (params: CreateJobParams) => {
-      const response = await api.post('/jobs', {
+      const response = await api.post("/jobs", {
         type: params.type,
         prompt: params.prompt,
         negative_prompt: params.negativePrompt || null,
-        aspect_ratio: params.aspectRatio || '1:1',
+        aspect_ratio: params.aspectRatio || "1:1",
         seed: params.seed || null,
         steps: params.steps || 30,
         strength: params.strength,
@@ -40,25 +40,28 @@ export function useCreateJob() {
       return response.data as Job;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
     },
   });
 }
 
 // Get single job with polling
-export function useJob(jobId: string | null, options?: { enabled?: boolean; refetchInterval?: number | false }) {
+export function useJob(
+  jobId: string | null,
+  options?: { enabled?: boolean; refetchInterval?: number | false },
+) {
   return useQuery({
-    queryKey: ['job', jobId],
+    queryKey: ["job", jobId],
     queryFn: async () => {
       if (!jobId) return null;
       const response = await api.get(`/jobs/${jobId}`);
       return response.data as Job;
     },
-    enabled: !!jobId && (options?.enabled !== false),
+    enabled: !!jobId && options?.enabled !== false,
     refetchInterval: (query) => {
       const data = query.state.data as Job | null;
       // Stop polling when job is completed or failed
-      if (data?.status === 'completed' || data?.status === 'failed') {
+      if (data?.status === "completed" || data?.status === "failed") {
         return false;
       }
       return options?.refetchInterval ?? 2000; // Poll every 2 seconds
@@ -69,9 +72,9 @@ export function useJob(jobId: string | null, options?: { enabled?: boolean; refe
 // Get list of jobs
 export function useJobs(params?: JobsParams) {
   return useQuery({
-    queryKey: ['jobs', params],
+    queryKey: ["jobs", params],
     queryFn: async () => {
-      const response = await api.get('/jobs', {
+      const response = await api.get("/jobs", {
         params: {
           page: params?.page || 1,
           page_size: params?.pageSize || 20,
@@ -94,7 +97,7 @@ export function useGeneration() {
   };
 
   const refreshJobs = () => {
-    queryClient.invalidateQueries({ queryKey: ['jobs'] });
+    queryClient.invalidateQueries({ queryKey: ["jobs"] });
   };
 
   return {

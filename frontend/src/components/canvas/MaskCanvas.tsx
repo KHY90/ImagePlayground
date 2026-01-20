@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useCallback } from 'react';
-import { useCanvasStore } from '../../stores/canvasStore';
-import { useCanvas } from '../../hooks/useCanvas';
+import React, { useRef, useEffect, useCallback } from "react";
+import { useCanvasStore } from "../../stores/canvasStore";
+import { useCanvas } from "../../hooks/useCanvas";
 
 interface MaskCanvasProps {
   sourceImageUrl: string;
@@ -15,13 +15,14 @@ export const MaskCanvas: React.FC<MaskCanvasProps> = ({
   width = 512,
   height = 512,
   onMaskChange,
-  className = '',
+  className = "",
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sourceCanvasRef = useRef<HTMLCanvasElement>(null);
   const maskCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { setMaskCanvasRef, setSourceImageUrl, setImageLoaded, brushSize, tool } = useCanvasStore();
+  const { setMaskCanvasRef, setSourceImageUrl, setImageLoaded, brushSize } =
+    useCanvasStore();
 
   const { startDrawing, draw, stopDrawing } = useCanvas({
     width,
@@ -42,12 +43,12 @@ export const MaskCanvas: React.FC<MaskCanvasProps> = ({
     if (!sourceImageUrl || !sourceCanvasRef.current) return;
 
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = sourceCanvasRef.current;
       if (!canvas) return;
 
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
       // Clear and draw image
@@ -57,7 +58,7 @@ export const MaskCanvas: React.FC<MaskCanvasProps> = ({
       setSourceImageUrl(sourceImageUrl);
     };
     img.onerror = () => {
-      console.error('Failed to load source image');
+      console.error("Failed to load source image");
       setImageLoaded(false);
     };
     img.src = sourceImageUrl;
@@ -68,14 +69,14 @@ export const MaskCanvas: React.FC<MaskCanvasProps> = ({
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       startDrawing(e.nativeEvent);
     },
-    [startDrawing]
+    [startDrawing],
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       draw(e.nativeEvent);
     },
-    [draw]
+    [draw],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -91,14 +92,14 @@ export const MaskCanvas: React.FC<MaskCanvasProps> = ({
     (e: React.TouchEvent<HTMLCanvasElement>) => {
       startDrawing(e.nativeEvent);
     },
-    [startDrawing]
+    [startDrawing],
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent<HTMLCanvasElement>) => {
       draw(e.nativeEvent);
     },
-    [draw]
+    [draw],
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -107,7 +108,7 @@ export const MaskCanvas: React.FC<MaskCanvasProps> = ({
 
   // Custom cursor based on brush size
   const cursorStyle = {
-    cursor: 'none',
+    cursor: "none",
   };
 
   return (
@@ -151,9 +152,9 @@ export const MaskCanvas: React.FC<MaskCanvasProps> = ({
         style={{
           width: brushSize,
           height: brushSize,
-          transform: 'translate(-50%, -50%)',
+          transform: "translate(-50%, -50%)",
           zIndex: 100,
-          display: 'none',
+          display: "none",
         }}
         id="brush-cursor"
       />

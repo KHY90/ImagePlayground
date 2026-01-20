@@ -1,24 +1,27 @@
-import { useState } from 'react';
-
-export type ResizeMode = 'crop' | 'pad';
+export type ResizeMode = "crop" | "pad";
 
 interface ResizeOptionsProps {
   value: ResizeMode;
   onChange: (mode: ResizeMode) => void;
 }
 
-const RESIZE_OPTIONS: { value: ResizeMode; label: string; description: string; icon: string }[] = [
+const RESIZE_OPTIONS: {
+  value: ResizeMode;
+  label: string;
+  description: string;
+  icon: string;
+}[] = [
   {
-    value: 'crop',
-    label: 'Crop',
-    description: 'Crop image to fit aspect ratio (may lose edges)',
-    icon: '[ ]',
+    value: "crop",
+    label: "Crop",
+    description: "Crop image to fit aspect ratio (may lose edges)",
+    icon: "[ ]",
   },
   {
-    value: 'pad',
-    label: 'Pad',
-    description: 'Add black bars to maintain full image',
-    icon: '|||',
+    value: "pad",
+    label: "Pad",
+    description: "Add black bars to maintain full image",
+    icon: "|||",
   },
 ];
 
@@ -39,8 +42,8 @@ export default function ResizeOptions({ value, onChange }: ResizeOptionsProps) {
               flex flex-col items-center p-3 rounded-lg border-2 transition-all
               ${
                 value === option.value
-                  ? 'border-primary-500 bg-primary-50 text-primary-700'
-                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                  ? "border-primary-500 bg-primary-50 text-primary-700"
+                  : "border-gray-200 hover:border-gray-300 text-gray-600"
               }
             `}
           >
@@ -58,4 +61,4 @@ export default function ResizeOptions({ value, onChange }: ResizeOptionsProps) {
 }
 
 // Export default resize mode
-export const DEFAULT_RESIZE_MODE: ResizeMode = 'crop';
+export const DEFAULT_RESIZE_MODE: ResizeMode = "crop";

@@ -1,8 +1,8 @@
-import React from 'react';
-import { useCanvasStore } from '../../stores/canvasStore';
-import { useCanvas } from '../../hooks/useCanvas';
-import BrushTool from './BrushTool';
-import EraserTool from './EraserTool';
+import React from "react";
+import { useCanvasStore } from "../../stores/canvasStore";
+import { useCanvas } from "../../hooks/useCanvas";
+import BrushTool from "./BrushTool";
+import EraserTool from "./EraserTool";
 
 interface CanvasToolbarProps {
   onMaskChange?: (maskData: string) => void;
@@ -11,18 +11,21 @@ interface CanvasToolbarProps {
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onMaskChange,
-  className = '',
+  className = "",
 }) => {
-  const { clearMask, invertMask, fillAll, brushSize, setBrushSize } = useCanvasStore();
+  const { clearMask, invertMask, fillAll, brushSize, setBrushSize } =
+    useCanvasStore();
 
-  const { undo, redo, canUndo, canRedo, clear } = useCanvas({
+  const { undo, redo, canUndo, canRedo } = useCanvas({
     width: 512,
     height: 512,
     onMaskChange,
   });
 
   return (
-    <div className={`flex flex-col gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg shadow-sm ${className}`}>
+    <div
+      className={`flex flex-col gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg shadow-sm ${className}`}
+    >
       {/* Tools Section */}
       <div className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -50,12 +53,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             disabled={!canUndo}
             className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm ${
               canUndo
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200'
-                : 'bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500'
+                ? "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200"
+                : "bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500"
             }`}
             title="실행 취소 (Ctrl+Z)"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -71,12 +79,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             disabled={!canRedo}
             className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm ${
               canRedo
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200'
-                : 'bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500'
+                ? "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200"
+                : "bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500"
             }`}
             title="다시 실행 (Ctrl+Shift+Z)"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -96,14 +109,19 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               if (onMaskChange) {
                 const maskCanvas = useCanvasStore.getState().maskCanvasRef;
                 if (maskCanvas) {
-                  onMaskChange(maskCanvas.toDataURL('image/png'));
+                  onMaskChange(maskCanvas.toDataURL("image/png"));
                 }
               }
             }}
             className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400"
             title="마스크 전체 지우기"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -120,14 +138,19 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               if (onMaskChange) {
                 const maskCanvas = useCanvasStore.getState().maskCanvasRef;
                 if (maskCanvas) {
-                  onMaskChange(maskCanvas.toDataURL('image/png'));
+                  onMaskChange(maskCanvas.toDataURL("image/png"));
                 }
               }
             }}
             className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200"
             title="마스크 반전"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -146,7 +169,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             if (onMaskChange) {
               const maskCanvas = useCanvasStore.getState().maskCanvasRef;
               if (maskCanvas) {
-                onMaskChange(maskCanvas.toDataURL('image/png'));
+                onMaskChange(maskCanvas.toDataURL("image/png"));
               }
             }
           }}
