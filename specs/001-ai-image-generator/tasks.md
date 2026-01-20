@@ -194,26 +194,6 @@
 
 ---
 
-## Phase 7: US5 - Admin Monitoring (P5)
-
-### 7.1 Admin Backend
-
-- [ ] **T107** [US5] BannedWord 모델 구현 (`backend/src/models/banned_word.py`)
-- [ ] **T108** [US5] 프롬프트 필터링 서비스 구현 (`backend/src/services/filter_service.py`)
-- [ ] **T109** [US5] Admin 라우터 - 금칙어 CRUD (`backend/src/api/routes/admin.py`)
-- [ ] **T110** [US5] Admin 라우터 - 사용량 통계 조회 (`backend/src/api/routes/admin.py`)
-- [ ] **T111** [US5] Admin 권한 검사 의존성 구현 (`backend/src/api/deps.py`)
-- [ ] **T112** [US5] Admin API 테스트 작성 (`backend/tests/unit/test_admin.py`)
-
-### 7.2 Admin Frontend (Optional - MVP 이후)
-
-- [ ] **T113** [P] [US5] AdminLayout 컴포넌트 (`frontend/src/components/admin/AdminLayout.tsx`)
-- [ ] **T114** [P] [US5] DashboardStats 컴포넌트 (`frontend/src/components/admin/DashboardStats.tsx`)
-- [ ] **T115** [P] [US5] BannedWordManager 컴포넌트 (`frontend/src/components/admin/BannedWordManager.tsx`)
-- [ ] **T116** [US5] AdminPage 구현 (`frontend/src/pages/AdminPage.tsx`)
-
----
-
 ## Phase 8: Cleanup & Polish
 
 ### 8.1 Image Cleanup Service

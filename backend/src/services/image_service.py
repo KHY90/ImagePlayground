@@ -1,5 +1,6 @@
 """Image storage and processing service."""
 
+import base64
 import json
 import logging
 import os
@@ -8,7 +9,7 @@ from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 from src.core.config import get_settings
 from src.models.image import DEFAULT_EXPIRATION_HOURS
@@ -223,6 +224,168 @@ class ImageService:
         except Exception as e:
             logger.error(f"Failed to read image {file_path}: {e}")
             return None
+
+    async def decode_mask_from_base64(self, mask_data: str) -> Image.Image:
+        """
+        Decode a base64-encoded mask image.
+
+        Args:
+            mask_data: Base64-encoded PNG mask data
+
+        Returns:
+            PIL Image in grayscale mode
+        """
+        # Remove data URL prefix if present
+        if mask_data.startswith("data:"):
+            mask_data = mask_data.split(",", 1)[1]
+
+        # Decode base64
+        mask_bytes = base64.b64decode(mask_data)
+        mask_image = Image.open(BytesIO(mask_bytes))
+
+        # Convert to grayscale (L mode) for mask operations
+        if mask_image.mode != "L":
+            mask_image = mask_image.convert("L")
+
+        return mask_image
+
+    async def prepare_mask_for_inpainting(
+        self,
+        mask: Image.Image,
+        target_size: tuple[int, int],
+        blur_radius: int = 5,
+        invert: bool = False,
+    ) -> Image.Image:
+        """
+        Prepare mask for inpainting operation.
+
+        Args:
+            mask: Input mask image
+            target_size: Target (width, height) tuple
+            blur_radius: Radius for edge blurring (smoother transitions)
+            invert: Whether to invert the mask
+
+        Returns:
+            Processed mask image
+        """
+        # Resize mask to match target size
+        if mask.size != target_size:
+            mask = mask.resize(target_size, Image.Resampling.LANCZOS)
+
+        # Ensure grayscale
+        if mask.mode != "L":
+            mask = mask.convert("L")
+
+        # Invert if needed (depends on convention: white = inpaint area)
+        if invert:
+            from PIL import ImageOps
+            mask = ImageOps.invert(mask)
+
+        # Apply Gaussian blur for smoother edges
+        if blur_radius > 0:
+            mask = mask.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+
+        return mask
+
+    async def create_mask_from_region(
+        self,
+        width: int,
+        height: int,
+        region: dict,
+    ) -> Image.Image:
+        """
+        Create a mask from a region definition.
+
+        Args:
+            width: Image width
+            height: Image height
+            region: Region dict with 'x', 'y', 'width', 'height' or 'points'
+
+        Returns:
+            Mask image with white area for the region
+        """
+        from PIL import ImageDraw
+
+        # Create black mask
+        mask = Image.new("L", (width, height), 0)
+        draw = ImageDraw.Draw(mask)
+
+        if "points" in region:
+            # Polygon region
+            points = [(p["x"], p["y"]) for p in region["points"]]
+            if len(points) >= 3:
+                draw.polygon(points, fill=255)
+        elif all(k in region for k in ["x", "y", "width", "height"]):
+            # Rectangle region
+            x, y = region["x"], region["y"]
+            w, h = region["width"], region["height"]
+            draw.rectangle([x, y, x + w, y + h], fill=255)
+
+        return mask
+
+    async def composite_inpainted_result(
+        self,
+        original: Image.Image,
+        generated: Image.Image,
+        mask: Image.Image,
+    ) -> Image.Image:
+        """
+        Composite original and generated images using mask.
+
+        Args:
+            original: Original image
+            generated: Generated/inpainted content
+            mask: Mask (white = use generated, black = use original)
+
+        Returns:
+            Composited image
+        """
+        # Ensure all images are same size
+        if generated.size != original.size:
+            generated = generated.resize(original.size, Image.Resampling.LANCZOS)
+        if mask.size != original.size:
+            mask = mask.resize(original.size, Image.Resampling.LANCZOS)
+
+        # Ensure mask is grayscale
+        if mask.mode != "L":
+            mask = mask.convert("L")
+
+        # Ensure images are RGB
+        if original.mode != "RGB":
+            original = original.convert("RGB")
+        if generated.mode != "RGB":
+            generated = generated.convert("RGB")
+
+        # Composite
+        result = Image.composite(generated, original, mask)
+
+        return result
+
+    async def save_mask_image(
+        self,
+        mask: Image.Image,
+        user_id: str,
+        job_id: str,
+    ) -> str:
+        """
+        Save a mask image for reference.
+
+        Args:
+            mask: Mask image
+            user_id: User ID
+            job_id: Job ID
+
+        Returns:
+            File path of saved mask
+        """
+        user_dir = self._get_user_dir(user_id, self.upload_dir)
+        filename = f"mask_{job_id}.png"
+        file_path = user_dir / filename
+
+        mask.save(file_path, format="PNG")
+        logger.info(f"Saved mask: {file_path}")
+
+        return str(file_path)
 
 
 # Singleton instance

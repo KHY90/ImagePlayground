@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # Default model for text-to-image
 DEFAULT_TEXT2IMG_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
 DEFAULT_IMG2IMG_MODEL = "stabilityai/stable-diffusion-xl-refiner-1.0"
+DEFAULT_INPAINT_MODEL = "diffusers/stable-diffusion-xl-1.0-inpainting-0.1"
 
 # Aspect ratio to dimensions mapping
 ASPECT_RATIOS = {
@@ -167,6 +168,157 @@ class HuggingFaceClient:
                     await asyncio.sleep(RETRY_DELAY * (attempt + 1))
                 else:
                     raise RuntimeError(f"Image transformation failed: {e}")
+
+    async def inpaint(
+        self,
+        image: Image.Image,
+        mask: Image.Image,
+        prompt: str,
+        negative_prompt: str | None = None,
+        seed: int | None = None,
+        num_inference_steps: int = 30,
+        model: str | None = None,
+    ) -> Image.Image:
+        """
+        Inpaint an image using a mask.
+
+        Args:
+            image: Source PIL Image
+            mask: Mask PIL Image (white areas will be inpainted)
+            prompt: Text description for inpainting
+            negative_prompt: What to avoid
+            seed: Random seed
+            num_inference_steps: Denoising steps
+            model: Model to use
+
+        Returns:
+            PIL Image object
+        """
+        if not self.client:
+            raise RuntimeError("HuggingFace API token not configured")
+
+        model = model or DEFAULT_INPAINT_MODEL
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                logger.info(f"Inpainting image (attempt {attempt + 1}/{MAX_RETRIES})")
+
+                # Convert image to bytes
+                img_bytes = BytesIO()
+                image.save(img_bytes, format="PNG")
+                img_bytes.seek(0)
+
+                # Convert mask to bytes
+                mask_bytes = BytesIO()
+                mask.save(mask_bytes, format="PNG")
+                mask_bytes.seek(0)
+
+                # Use the image_to_image endpoint with mask parameter
+                # Note: HuggingFace Inference API may not directly support inpainting
+                # We'll use the dedicated inpaint method if available
+                result = await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: self._call_inpaint_api(
+                        image=img_bytes,
+                        mask=mask_bytes,
+                        prompt=prompt,
+                        negative_prompt=negative_prompt,
+                        model=model,
+                        num_inference_steps=num_inference_steps,
+                        seed=seed,
+                    ),
+                )
+
+                logger.info("Inpainting successful")
+                return result
+
+            except Exception as e:
+                logger.error(f"Inpainting attempt {attempt + 1} failed: {e}")
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(RETRY_DELAY * (attempt + 1))
+                else:
+                    raise RuntimeError(f"Inpainting failed: {e}")
+
+    def _call_inpaint_api(
+        self,
+        image: BytesIO,
+        mask: BytesIO,
+        prompt: str,
+        negative_prompt: str | None,
+        model: str,
+        num_inference_steps: int,
+        seed: int | None,
+    ) -> Image.Image:
+        """Call the inpainting API synchronously."""
+        import requests
+
+        # Use HuggingFace Inference API for inpainting
+        api_url = f"https://api-inference.huggingface.co/models/{model}"
+        headers = {"Authorization": f"Bearer {self.api_token}"}
+
+        # Read image and mask bytes
+        image.seek(0)
+        mask.seek(0)
+
+        # For SDXL inpainting model, we use multipart form data
+        files = {
+            "image": ("image.png", image.read(), "image/png"),
+            "mask": ("mask.png", mask.read(), "image/png"),
+        }
+        data = {
+            "prompt": prompt,
+            "num_inference_steps": num_inference_steps,
+        }
+        if negative_prompt:
+            data["negative_prompt"] = negative_prompt
+        if seed is not None:
+            data["seed"] = seed
+
+        response = requests.post(api_url, headers=headers, files=files, data=data)
+
+        if response.status_code != 200:
+            # Fallback: try using text-to-image with the prompt and composite manually
+            logger.warning(f"Inpaint API failed ({response.status_code}), using fallback")
+            image.seek(0)
+            mask.seek(0)
+            return self._inpaint_fallback(image, mask, prompt, negative_prompt, num_inference_steps, seed)
+
+        return Image.open(BytesIO(response.content))
+
+    def _inpaint_fallback(
+        self,
+        image: BytesIO,
+        mask: BytesIO,
+        prompt: str,
+        negative_prompt: str | None,
+        num_inference_steps: int,
+        seed: int | None,
+    ) -> Image.Image:
+        """Fallback inpainting using img2img and manual compositing."""
+        # Load original image and mask
+        original = Image.open(image).convert("RGB")
+        mask_img = Image.open(mask).convert("L")
+
+        # Ensure mask and image have same size
+        if mask_img.size != original.size:
+            mask_img = mask_img.resize(original.size, Image.Resampling.LANCZOS)
+
+        # Generate new content using text-to-image at the same size
+        generated = self.client.text_to_image(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            model=DEFAULT_TEXT2IMG_MODEL,
+            width=original.width,
+            height=original.height,
+            num_inference_steps=num_inference_steps,
+            seed=seed,
+        )
+
+        # Composite: use mask to blend original and generated
+        # White (255) in mask = use generated, Black (0) = use original
+        result = Image.composite(generated, original, mask_img)
+
+        return result
 
 
 # Singleton instance

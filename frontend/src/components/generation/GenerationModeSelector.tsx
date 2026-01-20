@@ -14,16 +14,27 @@ const GENERATION_MODES: { value: JobType; label: string; description: string; ic
     description: '기존 이미지를 프롬프트로 변형',
     icon: 'I',
   },
+  {
+    value: 'inpaint',
+    label: '인페인팅',
+    description: '이미지 일부 영역만 편집',
+    icon: 'P',
+  },
 ];
 
 export default function GenerationModeSelector() {
-  const { mode, setMode, setSourceImage } = useGenerationStore();
+  const { mode, setMode, setSourceImage, setMaskData } = useGenerationStore();
 
   const handleModeChange = (newMode: JobType) => {
     setMode(newMode);
-    // 텍스트 to 이미지로 전환 시 소스 이미지 초기화
+    // 텍스트 to 이미지로 전환 시 소스 이미지 및 마스크 초기화
     if (newMode === 'text2img') {
       setSourceImage(null);
+      setMaskData(null);
+    }
+    // 이미지 to 이미지로 전환 시 마스크 초기화
+    if (newMode === 'img2img') {
+      setMaskData(null);
     }
   };
 

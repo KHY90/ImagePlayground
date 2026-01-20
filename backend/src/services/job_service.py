@@ -288,6 +288,99 @@ class JobService:
             await self.db.commit()
             return None
 
+    async def process_inpaint(self, job: Job) -> GeneratedImage | None:
+        """Process an inpainting job."""
+        try:
+            # Update status to processing
+            await self.update_job_status(job.id, JobStatus.PROCESSING)
+            await self.db.commit()
+
+            # Load source image
+            if not job.source_image_id:
+                raise ValueError("source_image_id is required for inpaint")
+
+            source_path = Path(settings.upload_dir) / job.user_id / f"{job.source_image_id}.png"
+            if not source_path.exists():
+                raise ValueError(f"Source image not found: {job.source_image_id}")
+
+            source_image = Image.open(source_path)
+
+            # Decode and prepare mask
+            if not job.mask_data:
+                raise ValueError("mask_data is required for inpaint")
+
+            mask = await self.image_service.decode_mask_from_base64(job.mask_data)
+
+            # Resize source image and mask to target aspect ratio
+            target_width, target_height = ASPECT_RATIOS.get(job.aspect_ratio, (1024, 1024))
+            source_image = await self.image_service.resize_image(
+                source_image,
+                target_width,
+                target_height,
+                mode="crop",
+            )
+            mask = await self.image_service.prepare_mask_for_inpainting(
+                mask,
+                target_size=(target_width, target_height),
+                blur_radius=3,
+            )
+
+            # Save mask for reference
+            await self.image_service.save_mask_image(mask, job.user_id, job.id)
+
+            # Perform inpainting
+            result_image = await self.hf_client.inpaint(
+                image=source_image,
+                mask=mask,
+                prompt=job.prompt,
+                negative_prompt=job.negative_prompt,
+                seed=job.seed,
+                num_inference_steps=job.steps,
+            )
+
+            # Save result image
+            image_data = await self.image_service.save_generated_image(
+                image=result_image,
+                user_id=job.user_id,
+                job_id=job.id,
+                prompt=job.prompt,
+                negative_prompt=job.negative_prompt,
+                parameters={
+                    "type": job.type,
+                    "aspect_ratio": job.aspect_ratio,
+                    "seed": job.seed,
+                    "steps": job.steps,
+                    "source_image_id": job.source_image_id,
+                    "has_mask": True,
+                },
+            )
+
+            # Create database record
+            generated_image = GeneratedImage(
+                user_id=job.user_id,
+                job_id=job.id,
+                **image_data,
+            )
+            self.db.add(generated_image)
+
+            # Update job status
+            await self.update_job_status(job.id, JobStatus.COMPLETED)
+
+            # Increment usage
+            await self.increment_daily_usage(job.user_id)
+
+            await self.db.commit()
+            await self.db.refresh(generated_image)
+
+            logger.info(f"Inpaint job {job.id} completed successfully")
+            return generated_image
+
+        except Exception as e:
+            logger.error(f"Inpaint job {job.id} failed: {e}")
+            await self.update_job_status(job.id, JobStatus.FAILED, str(e))
+            await self.db.commit()
+            return None
+
     async def get_job_result_image(self, job_id: str) -> GeneratedImage | None:
         """Get the result image for a completed job."""
         result = await self.db.execute(

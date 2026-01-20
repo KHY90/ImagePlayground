@@ -109,19 +109,52 @@ export interface GenerationSettings {
 }
 
 // Preset Types
+export type PresetCategory =
+  | 'background_replace'
+  | 'object_remove'
+  | 'object_add'
+  | 'style_transfer'
+  | 'restoration'
+  | 'custom';
+
 export interface Preset {
   id: string;
   name: string;
-  description: string;
-  promptTemplate: string;
-  category: 'background' | 'object_removal' | 'style_transfer' | 'custom';
+  name_ko?: string | null;
+  description?: string | null;
+  description_ko?: string | null;
+  category: PresetCategory;
+  default_prompt?: string | null;
+  default_negative_prompt?: string | null;
+  recommended_steps: number;
+  recommended_strength?: number | null;
+  icon?: string | null;
+  thumbnail_url?: string | null;
+  is_system: boolean;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PresetListResponse {
+  items: Preset[];
+  total: number;
 }
 
 // Canvas Types
+export type CanvasTool = 'brush' | 'eraser';
+
 export interface CanvasState {
   brushSize: number;
   brushColor: string;
-  tool: 'brush' | 'eraser';
-  history: string[];
+  tool: CanvasTool;
+  isDrawing: boolean;
+  history: ImageData[];
   historyIndex: number;
+}
+
+export interface Point {
+  x: number;
+  y: number;
 }

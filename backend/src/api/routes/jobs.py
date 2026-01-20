@@ -30,6 +30,8 @@ async def process_job_background(job_id: str, user_id: str, db_url: str):
                 await job_service.process_text_to_image(job)
             elif job.type == "img2img":
                 await job_service.process_image_to_image(job)
+            elif job.type == "inpaint":
+                await job_service.process_inpaint(job)
 
     await engine.dispose()
 
